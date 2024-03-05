@@ -1,0 +1,191 @@
+работи спрямо текущата дата на комп. 
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    YEAR(CURRENT_TIMESTAMP) - lica.yb - 
+        CASE WHEN MONTH(CURRENT_TIMESTAMP) < lica.mb OR 
+                  (MONTH(CURRENT_TIMESTAMP) = lica.mb AND DAY(CURRENT_TIMESTAMP) < lica.db)
+             THEN 1 
+             ELSE 0 
+        END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+		
+************************************************************************************************
+--изчислява спрямо текущата дата взета от dbo.dom, но с грешки при преминали вече рд
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    CAST(dom.ppg AS INT) - lica.yb - 
+        CASE WHEN CAST(dom.ppm AS INT) < lica.mb OR 
+                  (CAST(dom.ppm AS INT) = lica.mb AND CAST(dom.ppd AS INT) < lica.db)
+             THEN 1 
+             ELSE 0 
+        END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+*************************************************************************************************
+--занулява всички години 
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    CASE 
+        WHEN dom.ppg < YEAR(CURRENT_TIMESTAMP) THEN YEAR(CURRENT_TIMESTAMP) - dom.ppg
+        WHEN dom.ppg = YEAR(CURRENT_TIMESTAMP) THEN
+            CASE
+                WHEN dom.ppm < MONTH(CURRENT_TIMESTAMP) OR (dom.ppm = MONTH(CURRENT_TIMESTAMP) AND dom.ppd <= DAY(CURRENT_TIMESTAMP)) THEN YEAR(CURRENT_TIMESTAMP) - dom.ppg
+                ELSE YEAR(CURRENT_TIMESTAMP) - dom.ppg - 1
+            END
+        ELSE NULL
+    END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+*********************************************************************************
+изчислява отрицателни числа в колоната на възрастта
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    YEAR(CASE WHEN ISDATE(dom.ppg) = 1 THEN CAST(dom.ppg AS INT) ELSE NULL END) - lica.yb - 
+        CASE 
+            WHEN lica.mb < CASE WHEN ISDATE(dom.ppm) = 1 THEN CAST(dom.ppm AS INT) ELSE NULL END OR 
+                 (lica.mb = CASE WHEN ISDATE(dom.ppm) = 1 THEN CAST(dom.ppm AS INT) ELSE NULL END AND 
+                  lica.db < CASE WHEN ISDATE(dom.ppd) = 1 THEN CAST(dom.ppd AS INT) ELSE NULL END)
+            THEN 1 
+            ELSE 0 
+        END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+***********************************************************************************************
+връща стойности NULL в колона current_age
+SELECT
+    dom.ppg, dom.ppm, dom.ppd,
+    lica.yb, lica.mb, lica.db,
+    CASE 
+        WHEN ISDATE(dom.ppg + '/' + dom.ppm + '/' + dom.ppd) = 1 AND
+             CAST(dom.ppg AS INT) <= YEAR(GETDATE()) AND
+             CAST(dom.ppm AS INT) <= MONTH(GETDATE()) AND
+             CAST(dom.ppd AS INT) <= DAY(GETDATE())
+        THEN 
+            ABS(CASE 
+                WHEN YEAR(GETDATE()) > CAST(dom.ppg AS INT) THEN YEAR(GETDATE()) - CAST(dom.ppg AS INT) - 1
+                ELSE YEAR(GETDATE()) - CAST(dom.ppg AS INT)
+            END)
+        ELSE NULL
+    END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm;
+********************************************************************************************
+--проверка спрямо таблица lica = неправилна, защото годините не излизат правилно
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    YEAR(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) - lica.yb -
+        CASE WHEN MONTH(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) < lica.mb OR 
+                  (MONTH(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) = lica.mb AND DAY(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) < lica.db)
+             THEN 1 
+             ELSE 0 
+        END AS current_age
+FROM
+    dom AS dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+**********************************************************************************************
+--пресмята правилно ако рд е преди текущатадата, ако е след добавя +1
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    YEAR(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) - lica.yb -
+        CASE WHEN YEAR(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) < lica.yb OR 
+                  (YEAR(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) = lica.yb AND 
+                   MONTH(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) < lica.mb) OR 
+                  (YEAR(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) = lica.yb AND 
+                   MONTH(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) = lica.mb AND 
+                   DAY(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) < lica.db)
+             THEN 1 
+             ELSE 0 
+        END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+***********************************************************************************************
+--пресмята правилно ако рд е след текущата дата
+SELECT
+    dom.oblast,
+    dom.grs,
+    dom.gnezdo,
+    dom.domak,
+    dom.tm,
+    YEAR(CONVERT(date, dom.ppg + '-' + dom.ppm + '-' + dom.ppd)) - lica.yb -
+        CASE 
+            WHEN lica.yb < YEAR(GETDATE()) THEN 1
+            WHEN lica.yb = YEAR(GETDATE()) AND lica.mb <= MONTH(GETDATE()) THEN 1
+            WHEN lica.yb = YEAR(GETDATE()) AND lica.mb = MONTH(GETDATE()) AND lica.db <= DAY(GETDATE()) THEN 1
+            WHEN lica.mb > MONTH(GETDATE()) THEN 0
+            ELSE 0
+        END AS current_age
+FROM
+    dom
+JOIN
+    lica ON dom.oblast = lica.oblast
+        AND dom.grs = lica.grs
+        AND dom.gnezdo = lica.gnezdo
+        AND dom.domak = lica.domak
+        AND dom.tm = lica.tm
+***************************************************************************************************
