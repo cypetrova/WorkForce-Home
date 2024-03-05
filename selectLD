@@ -1,0 +1,15 @@
+-- За база данни dom
+SELECT 
+    ppg AS year,
+    ppm AS month,
+    ppd AS day
+FROM 
+    dom;
+
+-- За база данни lica
+SELECT 
+    yb AS year,
+    mb AS month,
+    db AS day
+FROM 
+    lica;
