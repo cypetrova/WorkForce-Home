@@ -1,0 +1,35 @@
+function DMYcheck(sDay, sMonth, sYear) {
+    let currentYear = new Date().getFullYear();
+
+    if (sDay === "00" || sDay === "99" || sMonth === "00" || sMonth === "99") {
+        return 1;
+    }
+
+    let day = parseInt(sDay, 10);
+    let month = parseInt(sMonth, 10);
+    let year = parseInt(sYear, 10);
+
+    if (month < 1 || month > 12) {
+        return 0;
+    }
+
+    if (year < 1900 || year > currentYear) {
+        return 0;
+    }
+
+    if ((day < 1 || day > 31) && !(day === 99 || day === 00)) {
+        return 0;
+    }
+
+    if (month === 2) { // Проверка за февруари
+        let maxDaysInFebruary = (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) ? 29 : 28;
+        if (day > maxDaysInFebruary) {
+            return 0;
+        }
+    } else if ([4, 6, 9, 11].includes(month) && day > 30) { // Проверка за месеци с 30 дни
+        return 0;
+    }
+
+    return 1;
+}
+//функция за пресмятане правилно на дните и месеците
