@@ -1,4 +1,4 @@
-
+﻿
 Imports System.Data
 Imports System.Data.SqlClient
 Imports System.Drawing.Imaging
@@ -19,6 +19,7 @@ Partial Class VavejdDom2
     Dim PageName As String = ""
 
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+
         rolia.Text = Session("rol")
         potr.Text = Session("potr")
         oblast.Text = Session("cRsu")
@@ -27,15 +28,14 @@ Partial Class VavejdDom2
             Response.Redirect("~/Default.aspx")
         End If
 
+
+        'MandatoryCheck.Visible = False
         PageName = GetCurrentPageName()
         HObsTime.Value = Session("ObsNumb")
-
-        Dim bFl As Boolean = True
 
         If Not IsPostBack Then
             d1.Attributes.Add("style", "display:none;")
             NextPage.Attributes.Add("style", "display:none;")
-            bFl = False
             txtArea.Text = CType(Session("oblast"), String)
             txtPlace.Text = CType(Session("grs"), String)
             txtAreaNest.Text = CType(Session("gnezdo"), String)
@@ -85,44 +85,44 @@ Partial Class VavejdDom2
             LoadCountry_grajdanstvo()
             LoadCountries()
 
-            ' Добавяне на SQL заявката за обновяване на възрастта
+            ' извикване на SQL скрипта за обновяване на възрастта
+            Dim sqlCommand As String = "
+                UPDATE lica
+                SET age = CASE 
+                                WHEN lica.mb = '00' AND lica.db = '00' THEN 
+                                    CASE WHEN MONTH(GETDATE()) * 100 + DAY(GETDATE()) >= lica.mb * 100 + lica.db THEN 
+                                        DATEDIFF(YEAR, CONVERT(DATE, CONCAT(lica.yb, '-', lica.mb, '-', lica.db)), (SELECT CONVERT(DATE, CONCAT(dom.ppg, '-', dom.ppm, '-', dom.ppd)) FROM dom WHERE lica.oblast = dom.oblast AND lica.grs = dom.grs AND lica.gnezdo = dom.gnezdo AND lica.domak = dom.domak AND lica.tm = dom.tm)) + 1
+                                    ELSE 
+                                        DATEDIFF(YEAR, CONVERT(DATE, CONCAT(lica.yb, '-', lica.mb, '-', lica.db)), (SELECT CONVERT(DATE, CONCAT(dom.ppg, '-', dom.ppm, '-', dom.ppd)) FROM dom WHERE lica.oblast = dom.oblast AND lica.grs = dom.grs AND lica.gnezdo = dom.gnezdo AND lica.domak = dom.domak AND lica.tm = dom.tm))
+                                    END
+                                WHEN lica.mb = '99' OR lica.db = '99' THEN age
+                                ELSE 
+                                    CASE WHEN MONTH(GETDATE()) * 100 + DAY(GETDATE()) >= lica.mb * 100 + lica.db THEN 
+                                        DATEDIFF(YEAR, CONVERT(DATE, CONCAT(lica.yb, '-', lica.mb, '-', lica.db)), (SELECT CONVERT(DATE, CONCAT(dom.ppg, '-', dom.ppm, '-', dom.ppd)) FROM dom WHERE lica.oblast = dom.oblast AND lica.grs = dom.grs AND lica.gnezdo = dom.gnezdo AND lica.domak = dom.domak AND lica.tm = dom.tm))
+                                    ELSE 
+                                        DATEDIFF(YEAR, CONVERT(DATE, CONCAT(lica.yb, '-', lica.mb, '-', lica.db)), (SELECT CONVERT(DATE, CONCAT(dom.ppg, '-', dom.ppm, '-', dom.ppd)) FROM dom WHERE lica.oblast = dom.oblast AND lica.grs = dom.grs AND lica.gnezdo = dom.gnezdo AND lica.domak = dom.domak AND lica.tm = dom.tm)) - 1
+                                    END
+                            END
+                FROM lica
+                WHERE ISDATE(CONCAT(lica.yb, '-', lica.mb, '-', lica.db)) = 1;
+            "
+            Dim cmd As New SqlCommand(sqlCommand, cnn)
             Try
-                Using connection As New SqlConnection(sCnn)
-                    connection.Open()
-                    Dim sql As String = "
-                    UPDATE tPersons
-                    SET age = DATEDIFF(year, 
-                                    CAST(CONCAT(ppd, '-', ppm, '-', ppg) AS DATE), 
-                                    CAST(CONCAT(db, '-', dm, '-', yb) AS DATE))
-                    WHERE oblast = @oblast 
-                        AND grs = @grs 
-                        AND gnezdo = @gnezdo 
-                        AND domak = @domak 
-                        AND tm = @tm
-                        AND age != DATEDIFF(year, 
-         CASE WHEN MONTH(CONVERT(DATE, CONCAT(ppg, '-', ppm, '-', ppd))) * 100 + DAY(CONVERT(DATE, CONCAT(ppg, '-', ppm, '-', ppd))) <= 
-                   MONTH(GETDATE()) * 100 + DAY(GETDATE())
-              THEN CONVERT(DATE, CONCAT(ppg, '-', ppm, '-', ppd))
-              ELSE DATEADD(YEAR, -1, CONVERT(DATE, CONCAT(ppg, '-', ppm, '-', ppd)))
-         END,
-         GETDATE())
-"
-                    Using command As New SqlCommand(sql, connection)
-                        command.Parameters.AddWithValue("@oblast", Session("oblast"))
-                        command.Parameters.AddWithValue("@grs", CType(Session("grs"), Integer))
-                        command.Parameters.AddWithValue("@gnezdo", Session("gnezdo"))
-                        command.Parameters.AddWithValue("@domak", Session("domak"))
-                        command.Parameters.AddWithValue("@tm", Session("ObsNumb"))
-                        command.ExecuteNonQuery()
-                    End Using
-                End Using
+                cnn.Open()
+                cmd.ExecuteNonQuery()
             Catch ex As Exception
-                ' Обработка на грешките
-                Response.Write("Грешка при обновяване на възрастта: " & ex.Message)
+                ' Обработка на грешката
+                Response.Write("Грешка при изпълнение на SQL заявката: " & ex.Message)
+            Finally
+                If cnn.State = ConnectionState.Open Then
+                    cnn.Close()
+                End If
             End Try
-        End If
-    End Sub
 
+
+        End If
+
+    End Sub
 
     Private Function CreateTPersons(nRows As Integer, nCells As Integer, pl As Boolean) As Boolean
 
@@ -2415,6 +2415,7 @@ Partial Class VavejdDom2
     End Sub
 
     Private Function RecordData() As Boolean
+
         Dim myResult = False
         Dim Persons As Integer = 0
 
@@ -18734,5 +18735,12 @@ Partial Class VavejdDom2
 
     Protected Sub txtDate_TextChanged(sender As Object, e As EventArgs) Handles txtDate.TextChanged
 
+    End Sub
+
+    Private Sub B1_Click(sender As Object, e As EventArgs) Handles B1.Click
+        RecordData()
+        Dim script As String = "window.onload = function() { validatePers(myPers); };"
+        ClientScript.RegisterStartupScript(Me.GetType(), "validatePers", script, True)
+        Response.Redirect("~/VavejdDom2.aspx")
     End Sub
 End Class

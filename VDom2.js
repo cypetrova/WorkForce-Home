@@ -504,9 +504,9 @@ function D14() {
     mD14 = mD14.slice(0, 1);
     var page = parseInt(document.getElementById("Maincontent_TextBox10").value);
 
-    if (page >= 75 && mD14 == " ") {
-        document.getElementById("Maincontent_DDL14").disabled = true;
-        document.getElementById("Maincontent_DDL14").value = "";
+    if ((page >= 75 && mD14 == " ") || (page >= 75 && mD14 == "2") ) {
+        //document.getElementById("Maincontent_DDL14").disabled = true;
+        //document.getElementById("Maincontent_DDL14").value = "";
         document.getElementById("Maincontent_TextBox15").disabled = true;
         document.getElementById("Maincontent_TextBox15").value = " ";
         document.getElementById("Maincontent_DDL16").disabled = true;
@@ -540,7 +540,18 @@ function D14() {
         document.getElementById("Maincontent_DDL16").value = "";
         document.getElementById("Maincontent_DDL17").disabled = false;
         document.getElementById("Maincontent_DDL18").disabled = false;
-    } else {
+    }
+    else if (page >= 75 &&  mD14 === '1') {
+        document.getElementById("Maincontent_TextBox15").disabled = true;
+        document.getElementById("Maincontent_TextBox15").value = "";
+        document.getElementById("Maincontent_DDL16").disabled = true;
+        document.getElementById("Maincontent_DDL16").value = "";
+        document.getElementById("Maincontent_DDL17").disabled = false;
+        document.getElementById("Maincontent_DDL17").value = "";
+        document.getElementById("Maincontent_DDL18").disabled = false;
+        document.getElementById("Maincontent_DDL18").value = "";
+    }
+    else {
         //document.getElementById("Maincontent_DDL14").disabled = true;
         //document.getElementById("Maincontent_TextBox15").disabled = true;
         //document.getElementById("Maincontent_TextBox15").value = " ";
@@ -604,23 +615,23 @@ function OtherErrors(cMTable, mErrMsg) {
     }
 }
 
-function D19() {
-    const chcks = document.getElementsByName("MyCheck");
-    const myBx = [document.getElementById("Maincontent_CheckBox1"), document.getElementById("Maincontent_CheckBox2"), document.getElementById("Maincontent_CheckBox3"), document.getElementById("Maincontent_CheckBox4"), document.getElementById("Maincontent_CheckBox5"), document.getElementById("Maincontent_CheckBox6"), document.getElementById("Maincontent_CheckBox7"), document.getElementById("Maincontent_CheckBox8"), document.getElementById("Maincontent_CheckBox9"), document.getElementById("Maincontent_CheckBox10"), document.getElementById("Maincontent_CheckBox11"), document.getElementById("Maincontent_CheckBox12"), document.getElementById("Maincontent_CheckBox13"), document.getElementById("Maincontent_CheckBox14"), document.getElementById("Maincontent_CheckBox15"), document.getElementById("Maincontent_CheckBox16"), document.getElementById("Maincontent_CheckBox17"), document.getElementById("Maincontent_CheckBox18"), document.getElementById("Maincontent_CheckBox19")];
-    var mE = chcks.length;
-    const myChBx = myBx.slice(0, mE);
-    var i = 0;
-    var clicks = 0;
-    while (i < myChBx.length) {
-        if ((myChBx[i].value != null) && (myChBx[i].checked === true)) {
-            clicks++;
-        }
+//function D19() {
+//    const chcks = document.getElementsByName("MyCheck");
+//    const myBx = [document.getElementById("Maincontent_CheckBox1"), document.getElementById("Maincontent_CheckBox2"), document.getElementById("Maincontent_CheckBox3"), document.getElementById("Maincontent_CheckBox4"), document.getElementById("Maincontent_CheckBox5"), document.getElementById("Maincontent_CheckBox6"), document.getElementById("Maincontent_CheckBox7"), document.getElementById("Maincontent_CheckBox8"), document.getElementById("Maincontent_CheckBox9"), document.getElementById("Maincontent_CheckBox10"), document.getElementById("Maincontent_CheckBox11"), document.getElementById("Maincontent_CheckBox12"), document.getElementById("Maincontent_CheckBox13"), document.getElementById("Maincontent_CheckBox14"), document.getElementById("Maincontent_CheckBox15"), document.getElementById("Maincontent_CheckBox16"), document.getElementById("Maincontent_CheckBox17"), document.getElementById("Maincontent_CheckBox18"), document.getElementById("Maincontent_CheckBox19")];
+//    var mE = chcks.length;
+//    const myChBx = myBx.slice(0, mE);
+//    var i = 0;
+//    var clicks = 0;
+//    while (i < myChBx.length) {
+//        if ((myChBx[i].value != null) && (myChBx[i].checked === true)) {
+//            clicks++;
+//        }
 
-        i++;
-    }
-    //document.getElementById("Maincontent_HsHldNum").value = clicks;
+//        i++;
+//    }
+//    //document.getElementById("Maincontent_HsHldNum").value = clicks;
 
-}
+//}
 /*Временен запис на данни в таблицата с членовете от домакинството*/
 function RecPerson() {
    
@@ -641,7 +652,7 @@ function RecPerson() {
             Styb: document.getElementById("Maincontent_TextBox9").value,
             Stage: document.getElementById("Maincontent_TextBox10").value,
             Sttm: document.getElementById("Maincontent_HObsTime").value,
-            Stactv: document.getElementById("Maincontent_CheckBox1").checked,
+            Stactv: document.getElementById("Maincontent_DDL20").value,
             Std11: document.getElementById("Maincontent_DDL11").value,
             Std12: document.getElementById("Maincontent_DDL12").value,
             Std13: document.getElementById("Maincontent_DDL13").value,
@@ -769,7 +780,7 @@ function RecPerson() {
                     cell8.innerHTML = myPerson.Stmb;
                     cell9.innerHTML = myPerson.Styb;
                     cell10.innerHTML = myPerson.Stage;
-                    cell11.innerHTML = decode(myPerson.Stactv);   
+                    cell11.innerHTML = myPerson.Stactv;   
                     
                 } else {
                     alert("Лицата в домакинството не може да надвишават 19.")
@@ -786,7 +797,7 @@ function RecPerson() {
                 row.cells[7].innerHTML = myPerson.Stmb;
                 row.cells[8].innerHTML = myPerson.Styb;
                 row.cells[9].innerHTML = myPerson.Stage;
-                row.cells[10].innerHTML = decode(myPerson.Stactv);                  
+                row.cells[10].innerHTML = myPerson.Stactv;                  
             }
           
             ClearPerson("Rec");            
@@ -794,13 +805,20 @@ function RecPerson() {
             attachEvents();
             document.getElementById("AddPrs").style.display = 'block';
         } else {
-            //alert ("Има непопълнено поле. Попълнете за да продължите...");
+           //alert ("Има непопълнено поле. Попълнете за да продължите...");
         }
 
         document.getElementById("Maincontent_hNPers").value = document.getElementById("Maincontent_tPersons").rows.length - 1;
 
-        document.getElementById('Maincontent_B1').click();    
+        if (Boolean(validatePers(myPerson))) {
+            //document.getElementById('Maincontent_B1').click();    
+            alert("1"+Boolean(validatePers(myPerson)));
 
+        }
+        else {
+            alert(Boolean(validatePers(myPerson)));
+            document.getElementById('Maincontent_B1').click();
+        }
     } 
    
   
@@ -808,7 +826,7 @@ function RecPerson() {
     alert(myAge);
     document.getElementById("Maincontent_TextBox10").value = myAge;
    
-    document.getElementById('Maincontent_B1').click();
+  //  document.getElementById('Maincontent_B1').click();
    
     // jquery
     $("#B1").click();
@@ -836,7 +854,7 @@ function ClearPerson(mComm) {
         document.getElementById("Maincontent_DDL17").selectedIndex = 0;
         document.getElementById("Maincontent_DDL18").selectedIndex = 0;
         document.getElementById("Maincontent_DDL19").selectedIndex = 0;
-        document.getElementById("Maincontent_CheckBox1").checked = false;
+        document.getElementById("Maincontent_DDL20").selectedIndex = 0;
     } else {
         document.getElementById('Maincontent_PersonD2').value = "";
         document.getElementById("Maincontent_DDL4").selectedIndex = 0;
@@ -857,7 +875,7 @@ function ClearPerson(mComm) {
         document.getElementById("Maincontent_DDL17").selectedIndex = 0;
         document.getElementById("Maincontent_DDL18").selectedIndex = 0;
         document.getElementById("Maincontent_DDL19").selectedIndex = 0;
-        document.getElementById("Maincontent_CheckBox1").checked = false;
+        document.getElementById("Maincontent_DDL20").selectedIndex = 0;
     }
 }
 /*function PersonClick(), function CalculateN(rowsInTbl) – Не се ползват*/
@@ -1059,6 +1077,19 @@ function validatePers(myPers) {
             $("#d19_error").hide();
         }
     }
+
+    if (document.getElementById("Maincontent_DDL20").disabled == false) {
+        if (myPers.Stactv.trim() === "" || myPers.Stactv === null || myPers.Stactv == "0") {
+            $("#d20_error").show();
+            bP = false;
+        } else {
+            $("#d20_error").hide();
+            // Запазване на стойността, ако тя е валидна
+           // myPers.Stactv = myPers.Stactv.trim();
+        }
+    }
+
+
     return bP;
 }
 /*Проверка за Д19*/
@@ -1381,12 +1412,21 @@ function EditPerson(mElem) {
         assignVal("Maincontent_DDL19", myPerson.Std19);
     }
 
-    //if (myPerson.Stactv = 'True') { 
-    if (decode(myPerson.Stactv) === "Да") {       
-        document.getElementById("Maincontent_CheckBox1").checked = true;
+    //if ((myPerson.Stactv) === "Да") {
+    //    document.getElementById("Maincontent_DDL20").value = "Да"; // Задаване на стойност "Да" на DropDownList
+    //} else {
+    //    document.getElementById("Maincontent_DDL20").value = "Не"; // Задаване на стойност "Не" на DropDownList
+    //}
+
+    if ((myPerson.Stactv == '0') || (myPerson.Stactv.trim().length == '')) {
+        document.getElementById("Maincontent_DDL20").disabled = true;
     } else {
-        document.getElementById("Maincontent_CheckBox1").checked = false;
+        document.getElementById("Maincontent_DDL20").disabled = false;
+        assignVal("Maincontent_DDL20", myPerson.Stactv);
     }
+
+    assignVal("Maincontent_DDL20", myPerson.Stactv);
+
 
     document.getElementById("Maincontent_HRowN").value = afterCh(mBH.get(mElem.id), 'son');
 
@@ -1998,6 +2038,7 @@ function CheckData() {
     if ((bP == true) || (document.getElementById("Maincontent_SignalChk").checked = true) ) {        
         document.getElementById('Maincontent_NextPage').style.display = "block";
     }
+    alert("Няма грешки");
 }
 /*Създава таблиците със задължителни и сигнални проверки, като визуализира в тях съответните грешки, ако има такива*/
 function createTable(data, errType) {
@@ -2013,7 +2054,7 @@ function createTable(data, errType) {
         errtable += `<tr><td>${item.merror}</td></tr>`;
     });
     errtable += '</table>';
-    return errtable;
+    return errtable;   
 }
 /*Изчислява броя на редовете в таблицата за домакинството*/
 function tblRows() {
