@@ -1,0 +1,114 @@
+function persNumb() {
+    // взимане на стойността на елемента и премахване на празни места около нея
+    var HsHldPrs = document.getElementById("Maincontent_HsHldPrs").value.trim();
+
+    // конвертиране на стойността в число
+    HsHldPrs = parseInt(HsHldPrs);
+
+    // проверка дали HsHldPrs е между 1 и 19
+    if (HsHldPrs < 1 || HsHldPrs > 19) {
+        alert("Грешка: Общият брой на лицата е недопустим, моля коригирайте! Допустима бройка - от 1 до 19 вкл.");
+        return; // прекратяваме изпълнението на функцията
+    }
+
+    // извеждане на стойността на HsHldPrs
+    alert(HsHldPrs);
+}
+
+function persNumbD1a() {
+    var NumbPrs = document.getElementById("Maincontent_NumbPrs").value.trim();
+
+    // Проверка дали NumbPrs е валидно число
+    if (isNaN(NumbPrs)) {
+        alert("Грешка: Въведете валидно число.");
+        return;
+    }
+
+    NumbPrs = parseInt(NumbPrs);
+
+    // Проверка дали NumbPrs е между 0 и 19
+    if (NumbPrs < 0 || NumbPrs > 19) {
+        alert("Грешка: Броят на лицата, които липсват в домакинството е недопустим, моля коригирайте! Допустима бройка - от 0 до 19 вкл.");
+        return;
+    }
+
+    // Извеждане на съобщение за валидно число
+    alert("Въведеното число е валидно: " + NumbPrs);
+}
+
+function validateNumberOfPeople() {
+    var householdCount = getHouseholdCount();
+    var missingPeopleCount = getMissingPeopleCount();
+
+    if (householdCount === null || missingPeopleCount === null) {
+        alert("Грешка: Неуспешно валидиране на броя на хората в домакинството.");
+        return;
+    }
+
+    var difference = householdCount - missingPeopleCount;
+
+    if (difference >= 0) {
+        addMissingPeopleToDatabase();
+        hideExtraRowsInTable(difference);
+    } else {
+        alert("Грешка: Броят на лицата в домакинството е по-малък от броя на липсващите лица.");
+    }
+}
+
+function getHouseholdCount() {
+    var householdInput = document.getElementById("Maincontent_HsHldPrs").value.trim();
+    return parseInt(householdInput);
+}
+
+function getMissingPeopleCount() {
+    var missingPeopleInput = document.getElementById("Maincontent_NumbPrs").value.trim();
+
+    if (isNaN(missingPeopleInput)) {
+        alert("Грешка: Въведете валидно число за броя на липсващите лица.");
+        return null;
+    }
+
+    return parseInt(missingPeopleInput);
+}
+
+function addMissingPeopleToDatabase() {
+    // Извикване на функция за добавяне на лице в базата данни
+    // предполагам, че тази функция вече съществува
+}
+
+function hideExtraRowsInTable(difference) {
+    var tableRows = document.getElementById("tPersons").getElementsByTagName("tr");
+    for (var i = difference + 1; i < tableRows.length; i++) {
+        tableRows[i].style.display = "none";
+    }
+}
+
+const MAX_PERSONS = 19;
+const MIN_PERSONS = 0;
+const SINGLE_DIGIT_PERSONS = 9;
+
+function AddPerson() {
+    ClearPerson("Add");
+    var tperson = document.getElementById("tPerson");
+    var but = document.getElementById("ChkData");
+    var nPersons = document.getElementById("Maincontent_tPersons").rows.length - 1;
+
+    if (nPersons >= MAX_PERSONS) {
+        alert("Броят на лицата е над " + MAX_PERSONS + ".");
+        document.getElementById("tPerson").style.display = "none";
+    } else {
+        tperson.style.display = "block";
+    }
+    but.style.display = "none";
+
+    document.getElementById("Maincontent_hNPers").value = nPersons;
+
+    document.getElementById("Maincontent_HRowN").value = "Add";
+
+    if (nPersons < SINGLE_DIGIT_PERSONS) {
+        nPersons++;
+        document.getElementById("Maincontent_PersonD2").value = "0" + nPersons;
+    } else if (nPersons < MAX_PERSONS) {
+        document.getElementById("Maincontent_PersonD2").value = nPersons + 1;
+    }
+}
